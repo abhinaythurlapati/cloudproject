@@ -1,0 +1,64 @@
+var fs = require('fs');
+var request = require('request');
+var path = require('path');
+var circle = "Karnataka";
+var database = "localhost/" + circle ;
+var dburl = database;
+var db = require('mongojs').connect(dburl);
+
+var coll = circle + "List" ;
+
+var getOperators = db.collection(coll);
+
+getOperators.find({},function(err,docs){
+
+	docs.forEach(function(doc){
+		console.log("hello world");
+		//console.log(doc.data);
+		listEachPlans(0, doc);
+	});
+});
+
+function listEachPlans(i, doc){
+	var tmp_col = circle + doc.data[i].operator_master + "all"; 
+	//console.log(tmp_col);
+	var group_each = db.collection(tmp_col);
+	group_each.aggregate([{$unwind : "$data"},{$group : {"_id" : "$data.recharge_short_description",count : {$sum : 1}}}],
+			function(err,tmp_docs){
+				if(err){
+					console.log(err);
+				}
+
+				else
+				{
+						console.log(tmp_docs);
+					
+				}		
+	});
+
+ 
+
+	if( i <  doc.data.length - 1){
+
+		listEachPlans(i+1 , doc);
+	}
+
+}
+
+	/*	tmp_col_each.find({},function(err,tmp_docs){
+	if(err){
+		console.log(err);
+	}
+
+	else
+	{
+		tmp_docs.forEach(function(tmp_doc){
+			for(var j= 0 ; j < tmp_doc.data.length ; j++)
+			{
+				console.log(tmp_doc.data[j].operator_master);	
+			}
+			console.log(i);
+		});
+	}
+
+}); */

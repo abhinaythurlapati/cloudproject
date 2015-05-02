@@ -1,0 +1,25 @@
+		db.KarnatakaAircelall.aggregate([
+			       { "$unwind" : "$data"},
+			       { 
+			    	   "$group" : {
+			    		   "_id" : 
+			    		   			{
+			    		   		 		"status_code": "$status_code",
+			    		   		 		"status_text": "$status_text" ,
+			    		   		 		"recharge_short_description" : "$recharge_short_description",
+			    		   		 		"count" : "{$sum : 1}"  
+			    		   			} 
+			    	   	     }	
+			       },
+			       {
+			    	   "$project" : {
+			    		   	"_id" : 0,
+			    		   	"status_code": "$_id.status_code", 
+			                        "status_text": "$_id.status_text" ,
+			                        "recharge_short_description" : "$_id.recharge_short_description",
+			                        "count" : "$_id.count"
+			    	              }
+			       }
+			       ]
+			)
+db.KarnatakaAircelall.aggregate([ { "$unwind" : "$data"}, { "$group" : { "_id" : {  "status_code" : "$status_code", "status_text" : "$status_text", "recharge_short_description" : "$recharge_short_description", "count" : "{$sum : 1}" } } }, { "$project" : { "_id" : 0, "status_code" : "$_id.status_code", "status_text" : "$_id.status_text" , "recharge_short_description" : "$_id.recharge_short_description", "count" : "$_id.count" } } ] )

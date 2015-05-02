@@ -1,0 +1,30 @@
+db.KarnatakaVodafoneall.aggregate(
+    [
+        { "$unwind": "$data" }, 
+        { "$match": { "data.recharge_master": "Recharge" }}, 
+        {
+            "$group": {
+                          "_id": {
+                                     "status_code": "$status_code",
+                                     "status_text": "$status_text"
+                                 }, 
+                          "data": { "$push": "$data" }
+                      }
+        }, 
+        {
+            "$project": {
+                           
+                            "data": 1, 
+                            "_id": 0,
+                            "status_code": "$_id.status_code", 
+                            "status_text": "$_id.status_text"
+                        }
+        }
+    ]
+).pretty()
+
+db.KarnatakaVodafoneall.aggregate([{$unwind : "$data"},{$group : {"_id" : "$data.recharge_master",count : {$sum : 1}}}])
+
+db.plans.aggregate([{$unwind : "$data"},{$group : {"_id" : "$data.recharge_short_description",count : {$sum : 1}}}])
+
+db.plans.find(     {"data.recharge_short_description": "ISD Pack"},      {_id: 0, data: {$Match: {"recharge_short_description": "ISD Pack"}}})
