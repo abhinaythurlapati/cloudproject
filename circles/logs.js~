@@ -1,4 +1,5 @@
-var winston = require('winston');
+var MongoDB = require('winston-mongodb').MongoDB;
+	
 var logger = new(winston.Logger)({
     transports : [
         new(winston.transports.MongoDB)({
