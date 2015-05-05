@@ -1,10 +1,9 @@
 
-exports.getlogs = function(){
+exports.db1 = function(){
 	//first connection to users database which has logs
 	var dburl1 = "localhost/" + "users" ;
-	var db1 = require('mongojs').connect(dburl1);
-	var coll =  "logs";
-	return db1.collection(coll);
+	return require('mongojs').connect(dburl1);
+	
 	
 }
 
@@ -12,6 +11,5 @@ exports.getlogs = function(){
 exports.db2 = function(circle){
 	var dburl2 = "localhost/" + circle ;
 	return require('mongojs').connect(dburl2);
-	
 }
 

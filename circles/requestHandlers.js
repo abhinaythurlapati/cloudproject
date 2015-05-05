@@ -12,7 +12,9 @@ var circle = "Karnataka";
 
 
 //adding an index to the mobile number of user in logs
-var getlogs = database.getlogs();
+var coll = "logs";
+var db1 = database.db1();
+var getlogs = db1.collection(coll);
 getlogs.ensureIndex([{"number" : 1 }, {unique : true}], function(err,docs){
 	if(err){
 		console.log(err);
@@ -21,7 +23,7 @@ getlogs.ensureIndex([{"number" : 1 }, {unique : true}], function(err,docs){
 
 function want_plans(response,request) {
 	if (request.method == 'POST') {
-		var getlogs = database.getlogs();
+	
 		console.log("Request handler 'want_plans' was called.");
 		var body = '';
 		request.on('data', function (data) {
@@ -39,6 +41,9 @@ function want_plans(response,request) {
 			// parsing the decrypted message
 			var received = JSON.parse(body);
 			console.log(received);
+			var coll = "logs";
+			var db1 = database.db1();
+			var getlogs = db1.collection(coll);
 			getlogs.find({"number" : received.my_num}, function(err,docs){
 				if(err){
 					console.log(err);
@@ -53,8 +58,8 @@ function want_plans(response,request) {
 					else
 					{
 						var coll =  circle + received.operator +  "catagorized";
-						var db = database.db2(circle);
-						var plans = db.collection(coll);
+						var db2 = database.db2(circle);
+						var plans = db2.collection(coll);
 						plans.find(function(err,data){
 							if(err){
 								console.log(err);
@@ -213,7 +218,9 @@ function register(response, request) {
 
 			var post = JSON.parse(body);
 			console.log("posted = ", post);
-			var getlogs = database.getlogs();
+			var coll =  "logs";
+			var db1 = database.db1();
+			var getlogs = db1.collection(coll);
 			getlogs.find({"number" : post.number}, function(err,docs){
 				if(err){
 					console.log(err);
@@ -223,6 +230,7 @@ function register(response, request) {
 					console.log(docs);
 					if(docs.length == 0)
 					{
+						
 						getlogs.save(post, function(err,data){
 							if(err){
 								console.log(err);

@@ -9,9 +9,8 @@ exports.getlogs = function(){
 }
 
 //second connection to Circle database here it is Karnataka
-exports.db2 = function(){
+exports.db2 = function(circle){
 	var dburl2 = "localhost/" + circle ;
 	return require('mongojs').connect(dburl2);
-	
 }
 
