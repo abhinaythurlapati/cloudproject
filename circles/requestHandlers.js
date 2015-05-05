@@ -2,8 +2,10 @@ var querystring = require("querystring"),
 fs = require("fs"),
 formidable = require("formidable");
 var circle = "Karnataka";
+var crypto = require('crypto');
 //This code uses two mongodb connections
-
+var secretKey = "qazxswedc";
+var cipher = crypto.createDecipher('aes-128-ecb',secretKey);
 
 //first connection to users database which has logs
 var dburl1 = "localhost/" + "users" ;
@@ -13,7 +15,7 @@ var coll =  "logs";
 var getlogs = db1.collection(coll);
 
 //second connection to Circle database here it is Karnataka
-	
+
 var dburl2 = "localhost/" + circle ;
 var db2 = require('mongojs').connect(dburl2);
 var path = require('path');
@@ -38,6 +40,13 @@ function want_plans(response,request) {
 				request.connection.destroy();
 		});
 		request.on('end', function () {
+
+
+
+			exports.decrypt = cipher.update(body,'hex','utf8') + cipher.final('utf8');
+			console.log('haha');
+			console.log(exports.decrypt);
+			body = exports.decrypt;
 			var received = JSON.parse(body);
 			console.log(received);
 			var coll =  circle + received.operator +  "catagorized";
@@ -51,7 +60,7 @@ function want_plans(response,request) {
 				else{
 					received.data[0].local_intra_2sec =  received.data[0].local_intra_sec/2 ;
 					received.data[0].local_inter_2sec =  received.data[0].local_inter_sec/2 ;
-					
+
 					received.data[1].std_intra_2sec   =  received.data[1].std_intra_sec/2 ;
 					received.data[1].std_inter_2sec   =  received.data[1].std_inter_sec/2 ; 
 
@@ -77,11 +86,11 @@ function want_plans(response,request) {
 							var tmp5 = data[0].localtariff[i].inter2sec * received.data[0].local_inter_2sec ;
 							var tmp6 = data[0].localtariff[i].intermin * received.data[0].local_inter_minute ; 
 							var estimated_cost = data[0].localtariff[i].threshold + (tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100;	
-							
+
 							data[0].localtariff[i].estimated_cost = estimated_cost;
 							datatosend.count = datatosend.count + 1 ;
 							datatosend.data.push(data[0].localtariff[i]);
-							
+
 							console.log("threshold = " + data[0].localtariff[i].threshold );
 							console.log("estimated cost =" + estimated_cost ); 
 
@@ -102,9 +111,9 @@ function want_plans(response,request) {
 							data[0].localstdtariff[i].inter2sec = Number(data[0].localstdtariff[i].inter2sec);
 							data[0].localstdtariff[i].intermin = Number(data[0].localstdtariff[i].intermin);
 							data[0].localstdtariff[i].threshold = Number(data[0].localstdtariff[i].threshold);
-							
-						
-							
+
+
+
 							var tmp1 = data[0].localstdtariff[i].intrasec  * received.data[1].std_intra_sec ;  
 							var tmp2 = data[0].localstdtariff[i].intra2sec * received.data[1].std_intra_2sec ;
 							var tmp3 = data[0].localstdtariff[i].intrainmin * received.data[1].std_intra_minute ;
@@ -112,17 +121,18 @@ function want_plans(response,request) {
 							var tmp5 = data[0].localstdtariff[i].inter2sec * received.data[1].std_inter_2sec ;
 							var tmp6 = data[0].localstdtariff[i].intermin * received.data[1].std_inter_minute ; 
 
-							
+
 							var estimated_cost = data[0].localstdtariff[i].threshold + (tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100;	
 							data[0].localstdtariff[i].estimated_cost = estimated_cost;
 							datatosend.count = datatosend.count + 1 ;
 							datatosend.data.push(data[0].localstdtariff[i]);
 							console.log("threshold = " + data[0].localstdtariff[i].threshold );
 							console.log("estimated cost =" + estimated_cost );
-							
-							
 						}
-						response.write(JSON.stringify(datatosend));
+
+
+						exports.encrypt = cipher.update(JSON.stringify(datatosend),'utf8','hex') + cipher.final('hex');
+						response.write(exports.encrypt);
 						response.end();
 					}
 
@@ -153,6 +163,14 @@ function register(response, request) {
 				request.connection.destroy();
 		});
 		request.on('end', function () {
+
+
+			exports.decrypt = cipher.update(body,'hex','utf8') + cipher.final('utf8');
+			console.log('haha');
+			console.log(exports.decrypt);
+			body = exports.decrypt;
+
+
 			var post = JSON.parse(body);
 			console.log("posted = ", post);
 
@@ -169,8 +187,9 @@ function register(response, request) {
 								console.log(err);
 							}
 							else {
+
 								console.log("successfully registered " + post.number + " please login again");
-								response.write(post.number + "Registerd Successfully");
+								response.write(post.number + " Registerd Successfully");
 								response.end();
 							}
 						});
@@ -202,50 +221,50 @@ exports.register = register;
 
 //algorithm for recommending local plans
 /*  std_inter_minute: 0,
-   std_intra_minute: 300,
-   local_intra_minute: 0,
-   local_inter_minute: 0 
-    local_intra_sec: 0,
-   local_inter_sec: 0,
-   std_inter_sec: 0,
-   std_intra_sec: 13862 */
+		   std_intra_minute: 300,
+		   local_intra_minute: 0,
+		   local_inter_minute: 0 
+		    local_intra_sec: 0,
+		   local_inter_sec: 0,
+		   std_inter_sec: 0,
+		   std_intra_sec: 13862 */
 
 /* localtariff
  * 	"intrasec" : "0",
-	"intra2sec" : "0",
-	"intrainmin" : "0",
-	"intersec" : "0",
-	"inter2sec" : "0",
-	"intermin" : "0",
-	"threshold" : "0"
+			"intra2sec" : "0",
+			"intrainmin" : "0",
+			"intersec" : "0",
+			"inter2sec" : "0",
+			"intermin" : "0",
+			"threshold" : "0"
  */
 
 /* localstdtariff
  * "intrasec" : "0",
-	"intra2sec" : "0",
-	"intrainmin" : "0",
-	"intersec" : "0",
-	"inter2sec" : "0",
-	"intermin" : "0",
-	"threshold" : "0
+			"intra2sec" : "0",
+			"intrainmin" : "0",
+			"intersec" : "0",
+			"inter2sec" : "0",
+			"intermin" : "0",
+			"threshold" : "0
  */
 /*	console.log("tmp1" + typeof(received.data[0].local_intra_sec));
-console.log("tmp3" + typeof(received.data[0].local_intra_minute));
-console.log("tmp4" + typeof(received.data[0].local_inter_sec));
-console.log("tmp6" + typeof(received.data[0].local_inter_minute));
-console.log("tmp1" + typeof(received.data[1].std_intra_sec));
-console.log("tmp3" + typeof(received.data[1].std_intra_minute));
-console.log("tmp4" + typeof(received.data[1].std_inter_sec));
-console.log("tmp6" + typeof(received.data[1].std_inter_minute));
+		console.log("tmp3" + typeof(received.data[0].local_intra_minute));
+		console.log("tmp4" + typeof(received.data[0].local_inter_sec));
+		console.log("tmp6" + typeof(received.data[0].local_inter_minute));
+		console.log("tmp1" + typeof(received.data[1].std_intra_sec));
+		console.log("tmp3" + typeof(received.data[1].std_intra_minute));
+		console.log("tmp4" + typeof(received.data[1].std_inter_sec));
+		console.log("tmp6" + typeof(received.data[1].std_inter_minute));
 
-console.log(data[0].localtariff);
+		console.log(data[0].localtariff);
 
- console.log("tmp1" + typeof(data[0].localtariff[i].intrasec));
- console.log("tmp2" + typeof(data[0].localtariff[i].intra2sec));
- console.log("tmp3" + typeof(data[0].localtariff[i].intrainmin));
- console.log("tmp4" + typeof(data[0].localtariff[i].intersec));
- console.log("tmp5" + typeof(data[0].localtariff[i].inter2sec));
- console.log("tmp6" + typeof(data[0].localtariff[i].intermin)); */ 
+		 console.log("tmp1" + typeof(data[0].localtariff[i].intrasec));
+		 console.log("tmp2" + typeof(data[0].localtariff[i].intra2sec));
+		 console.log("tmp3" + typeof(data[0].localtariff[i].intrainmin));
+		 console.log("tmp4" + typeof(data[0].localtariff[i].intersec));
+		 console.log("tmp5" + typeof(data[0].localtariff[i].inter2sec));
+		 console.log("tmp6" + typeof(data[0].localtariff[i].intermin)); */ 
 
 //curl -X POST -d '{"operator" : "Tata Docomo GSM","my_num" : "8904765965","plan" : "LOCAL", "data" : [{ "local_intra_sec" : 0 , "local_inter_sec" : 0,"local_intra_minute" : 0 , "local_inter_minute" : 0},{  "std_intra_sec" : 11973 , "std_inter_sec" : 1778 , "std_inter_minute" : 0 ,"std_intra_minute" : 260}]}' http://localhost:8888/want_plans
 
