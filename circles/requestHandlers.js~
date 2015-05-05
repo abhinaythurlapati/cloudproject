@@ -52,7 +52,7 @@ function want_plans(response,request) {
 			// parsing the decrypted message
 			var received = JSON.parse(body);
 			console.log(received);
-			getlogs.find({"number" : body.my_num}, function(err,docs){
+			getlogs.find({"number" : received.my_num}, function(err,docs){
 				if(err){
 					console.log(err);
 				}
@@ -84,7 +84,7 @@ function want_plans(response,request) {
 									var datatosend = {"count" : 0, data : [] }; 
 									if(data[0].localtariff[0].count == 0)
 									{
-										response.write("sorry, No plans are available for this operator now, We will fix it soon");
+										response.write("No Plans");
 										response.end();
 									}
 									else{
@@ -109,8 +109,20 @@ function want_plans(response,request) {
 											var tmp6 = data[0].localtariff[i].intermin * received.data[0].local_inter_minute ; 
 
 
-											var estimated_cost = Math.round(data[0].localtariff[i].threshold + (tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100);
-											estimated_cost = Math.round(estimated_cost / data[0].localtariff[i].recharge_validity);
+											var estimated_cost = Math.round((tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100);
+											var tmp_cost;
+											if(received.period != 0){
+												console.log("equals non zero");
+												console.log(received.period);
+												tmp_cost =  Math.round(estimated_cost / received.period);
+												
+											}
+											else if(received.period == 0){
+												console.log("equals zero");
+												console.log(received.period);
+												tmp_cost =  Math.round(estimated_cost / 30);
+											}
+											estimated_cost = Math.round(data[0].localtariff[i].threshold +(tmp_cost * data[0].localtariff[i].recharge_validity )); 
 											data[0].localtariff[i].estimated_cost = estimated_cost;
 											datatosend.count = datatosend.count + 1 ;
 											datatosend.data.push(data[0].localtariff[i]);
@@ -154,9 +166,19 @@ function want_plans(response,request) {
 											var tmp5 = data[0].localstdtariff[i].inter2sec * received.data[1].std_inter_2sec ;
 											var tmp6 = data[0].localstdtariff[i].intermin * received.data[1].std_inter_minute ; 
 
-
-											var estimated_cost = Math.round(data[0].localstdtariff[i].threshold + (tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100);
-											estimated_cost = Math.round(estimated_cost / data[0].localstdtariff[i].recharge_validity);
+											var estimated_cost = Math.round((tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6)/100);
+											var tmp_cost;
+											if(received.period != 0){
+												console.log("equals non zero");
+												console.log(received.period);
+												tmp_cost =  Math.round(estimated_cost / received.period);
+											}
+											else if(recieved.period == 0){
+												console.log("equals zero");
+												console.log(received.period);
+												tmp_cost =  Math.round(estimated_cost / 30);
+											}
+											estimated_cost = Math.round(data[0].localtariff[i].threshold +(tmp_cost * data[0].localstdtariff[i].recharge_validity )); 
 											data[0].localstdtariff[i].estimated_cost = estimated_cost;
 											datatosend.count = datatosend.count + 1 ;
 											datatosend.data.push(data[0].localstdtariff[i]);
