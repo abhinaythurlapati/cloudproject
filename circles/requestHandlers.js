@@ -2,7 +2,7 @@ var querystring = require("querystring");
 var fs = require("fs");
 var formidable = require("formidable");
 var security = require("./encryption.js"); 
-
+var database = require("./databaseConnection.js")
 var circle = "Karnataka";
 
 //This code uses two mongodb connections
@@ -10,19 +10,9 @@ var circle = "Karnataka";
 
 
 
-//first connection to users database which has logs
-var dburl1 = "localhost/" + "users" ;
-var db1 = require('mongojs').connect(dburl1);
-var coll =  "logs";
-var getlogs = db1.collection(coll);
-
-//second connection to Circle database here it is Karnataka
-
-var dburl2 = "localhost/" + circle ;
-var db2 = require('mongojs').connect(dburl2);
-
 
 //adding an index to the mobile number of user in logs
+var getlogs = database.getlogs();
 getlogs.ensureIndex([{"number" : 1 }, {unique : true}], function(err,docs){
 	if(err){
 		console.log(err);
@@ -31,7 +21,7 @@ getlogs.ensureIndex([{"number" : 1 }, {unique : true}], function(err,docs){
 
 function want_plans(response,request) {
 	if (request.method == 'POST') {
-
+		var getlogs = database.getlogs();
 		console.log("Request handler 'want_plans' was called.");
 		var body = '';
 		request.on('data', function (data) {
@@ -63,7 +53,8 @@ function want_plans(response,request) {
 					else
 					{
 						var coll =  circle + received.operator +  "catagorized";
-						var plans = db2.collection(coll);
+						var db = database.db2(circle);
+						var plans = db.collection(coll);
 						plans.find(function(err,data){
 							if(err){
 								console.log(err);
@@ -222,7 +213,7 @@ function register(response, request) {
 
 			var post = JSON.parse(body);
 			console.log("posted = ", post);
-
+			var getlogs = database.getlogs();
 			getlogs.find({"number" : post.number}, function(err,docs){
 				if(err){
 					console.log(err);
