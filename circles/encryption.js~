@@ -1,0 +1,6 @@
+var crypto = require('crypto');
+var secretKey = "qazxswedc";
+exports.cipher = function(body){ var cipher = crypto.createCipher('aes-128-ecb',secretKey);  body = cipher.update(JSON.stringify(datatosend),'utf8','hex') + cipher.final('hex');return body; }
+exports.decipher = function(body){ var decipher =  crypto.createDecipher('aes-128-ecb',secretKey); body = decipher.update(body,'hex','utf8') + 	decipher.final('utf8');
+return body; }
+	

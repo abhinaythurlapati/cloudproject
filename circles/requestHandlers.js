@@ -1,7 +1,7 @@
 var querystring = require("querystring");
 var fs = require("fs");
 var formidable = require("formidable");
-var crypto = require('crypto');
+var security = require("./encryption.js"); 
 
 var circle = "Karnataka";
 
@@ -44,11 +44,8 @@ function want_plans(response,request) {
 		// once receiving message is finshed 
 		request.on('end', function () {
 			// decrypting the message received	
-			var secretKey = "qazxswedc";
-			var decipher = crypto.createDecipher('aes-128-ecb',secretKey);
-			exports.decrypt = decipher.update(body,'hex','utf8') + decipher.final('utf8');
-			console.log(exports.decrypt);
-			body = exports.decrypt;
+			
+			body = security.decipher(body);
 			// parsing the decrypted message
 			var received = JSON.parse(body);
 			console.log(received);
@@ -132,9 +129,8 @@ function want_plans(response,request) {
 										}
 									}
 
-									var cipher = crypto.createCipher('aes-128-ecb',secretKey);
-									exports.encrypt = cipher.update(JSON.stringify(datatosend),'utf8','hex') + cipher.final('hex');
-									response.write(exports.encrypt);
+									datatosend = security.cipher(datatosend);
+									response.write(datatosend);
 									response.end();
 								}
 								else if(received.plan == 'LOCAL & STD'){
@@ -187,11 +183,9 @@ function want_plans(response,request) {
 										}
 									}
 
-
-									var cipher = crypto.createCipher('aes-128-ecb',secretKey);
-									exports.encrypt = cipher.update(JSON.stringify(datatosend),'utf8','hex') + cipher.final('hex');
-									response.write(exports.encrypt);
-									response.end();
+									datatosend = security.cipher(datatosend);
+									response.write(datatosend);
+									response.end();	
 								}
 
 								else{
@@ -220,12 +214,10 @@ function register(response, request) {
 				request.connection.destroy();
 		});
 		request.on('end', function () {
-			var secretKey = "qazxswedc";
-			var decipher = crypto.createDecipher('aes-128-ecb',secretKey);
-			exports.decrypt = decipher.update(body,'hex','utf8') + decipher.final('utf8');
+			
+			body = security.decipher(body);
 
-			console.log(exports.decrypt);
-			body = exports.decrypt;
+			console.log(body);
 
 
 			var post = JSON.parse(body);
