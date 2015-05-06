@@ -1,4 +1,4 @@
-	var querystring = require("querystring");
+	var querystring = requir	e("querystring");
 	var fs = require("fs");
 	var formidable = require("formidable");
 	var security = require("./encryption.js"); 
@@ -53,12 +53,20 @@
 						{
 							response.write("Register");
 							response.end();
-							db1.close();
+							db1.close(function(err){
+								if(err) {
+									console.log(err);
+								}
+							});
 	
 						}
 						else
 						{
-							db1.close();
+							db1.close(function(err){
+								if(err) {
+									console.log(err);
+								}
+							});
 							var coll =  circle + received.operator +  "catagorized";
 							var db2 = database.db2(circle);
 							var plans = db2.collection(coll);
@@ -67,7 +75,11 @@
 									console.log(err);
 								}
 								else{
-									db2.close();
+									db2.close(function(err){
+										if(err) {
+											console.log(err);
+										}
+									});
 									// calculating the values for 2 seconds
 									received.data[0].local_intra_2sec =  received.data[0].local_intra_sec/2 ;
 									received.data[0].local_inter_2sec =  received.data[0].local_inter_sec/2 ;
@@ -188,6 +200,11 @@
 									}
 	
 									else{
+										db1.close(function(err){
+											if(err) {
+												console.log(err);
+											}
+										});
 										response.write("{'status' : 'unexptected error haha' }");
 									}
 								}
@@ -240,7 +257,11 @@
 									console.log(err);
 								}
 								else {
-									db1.close();
+									db1.close(function(err){
+										if(err) {
+											console.log(err);
+										}
+									});
 									console.log("successfully registered " + post.number + " please login again");
 									response.write(post.number + " Registerd Successfully");
 									response.end();
@@ -250,7 +271,11 @@
 						}
 						else
 						{
-							db1.close();
+							db1.close(function(err){
+								if(err) {
+									console.log(err);
+								}
+							});
 							console.log(post.number + " already registered");
 							response.write(post.number  + " already registered");
 							response.end();
